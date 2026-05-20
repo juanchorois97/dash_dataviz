@@ -278,12 +278,26 @@ def prepare_data():
     df_2["tasa_fin_cap"] = df_2["tasa_fin"].clip(0, 100)
     df_2 = df_2.sort_values(["pais", "anio"]).reset_index(drop=True)
 
+    # ── Interpolación defensiva: garantiza series anuales completas para ARIMA ──
+    # Rellenar huecos dentro de cada país con interpolación lineal
+    df_2 = (df_2.set_index(["iso3", "pais", "anio"])
+              .unstack("anio")
+              .interpolate(method="linear", axis=1, limit_direction="both")
+              .stack("anio")
+              .reset_index())
+    # Si aún quedan NaN (países con un solo año) → forward/back fill por país
+    df_2["tasa_fin"] = (df_2.groupby("iso3")["tasa_fin"]
+                           .transform(lambda s: s.ffill().bfill()))
+    df_2["tasa_fin_cap"] = (df_2.groupby("iso3")["tasa_fin_cap"]
+                               .transform(lambda s: s.ffill().bfill()))
+    df_2 = df_2.dropna(subset=["tasa_fin"]).reset_index(drop=True)
+
     print(f"  df_2 final: {len(df_2)} filas, {df_2['iso3'].nunique()} países individuales")
     return df_raw.drop(columns=["_is_country"], errors="ignore"), df_1, df_2
 
 
 def _synthetic_data_iso3():
-    """Dataset sintético con exactamente 130 países × 23 años (con NAs ~12%)."""
+    """Dataset sintético con exactamente 130 países × 23 años SIN NAs (garantiza ARIMA)."""
     np.random.seed(42)
     iso_names = {
         "AFG":"Afghanistan","ALB":"Albania","DZA":"Algeria","AGO":"Angola",
@@ -326,9 +340,7 @@ def _synthetic_data_iso3():
     for iso3, nombre in iso_names.items():
         base = np.random.uniform(40, 95)
         for y in years:
-            if np.random.random() < 0.12:
-                rows.append({"iso3": iso3, "pais": nombre, "anio": y, "tasa_fin": float("nan")})
-                continue
+            # Sin NaN: todos los años tienen valor para garantizar series completas en ARIMA
             trend = (y - 2000) * np.random.uniform(0.3, 1.5)
             val   = min(base + trend + np.random.normal(0, 2), 115)
             rows.append({"iso3": iso3, "pais": nombre, "anio": y, "tasa_fin": max(val, 0)})
