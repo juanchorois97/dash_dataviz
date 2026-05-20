@@ -475,7 +475,7 @@ sidebar = html.Div([
         html.Div([
             html.Div("Módulos de análisis", style={"color": CYAN, "fontSize": "0.7em",
                      "textTransform": "uppercase", "letterSpacing": "1.5px", "fontWeight": "700"}),
-            html.Div("8 secciones disponibles", style={"color": "#4A7A9B", "fontSize": "0.65em", "marginTop": "1px"})
+            html.Div("9 secciones disponibles", style={"color": "#4A7A9B", "fontSize": "0.65em", "marginTop": "1px"})
         ])
     ], style={"display": "flex", "alignItems": "center", "gap": "10px",
               "background": "linear-gradient(135deg,rgba(46,134,171,0.15) 0%,rgba(46,134,171,0.05) 100%)",
@@ -492,6 +492,7 @@ sidebar = html.Div([
         html.Button([html.I(className="fas fa-table", style={"marginRight":"8px","width":"16px"}), "Datos"],          id="nav-datos",        n_clicks=0, className="nav-btn"),
         html.Button([html.I(className="fas fa-book", style={"marginRight":"8px","width":"16px"}), "Referencias"],    id="nav-referencias",  n_clicks=0, className="nav-btn"),
         html.Button([html.I(className="fas fa-robot", style={"marginRight":"8px","width":"16px"}), "Predicción ARIMA"], id="nav-prediccion", n_clicks=0, className="nav-btn"),
+        html.Button([html.I(className="fab fa-youtube", style={"marginRight":"8px","width":"16px","color":"#FF0000"}), "Video ODS 4"], id="nav-video", n_clicks=0, className="nav-btn"),
     ], style={"display": "flex", "flexDirection": "column", "gap": "4px", "padding": "0 10px"}),
 
     # Divisor
@@ -1209,42 +1210,89 @@ tab_mapa = html.Div([
     html.Div([
         html.H5("Mapa 1 — Promedio histórico de tasa_fin_cap (2000–2022)",
                 style={"color": CYAN, "fontWeight": "700", "marginBottom": "12px"}),
-        html.P("Tasa media de finalización primaria femenina por país durante todo el periodo. "
-               "Países en gris no tienen datos disponibles. Hover para ver valor exacto.",
-               style={"color": TEXT_DIM, "fontSize": "0.9em"}),
+
+        html.P(
+            "Tasa media de finalización primaria femenina por país durante el periodo 2000–2022. "
+            "Los países en gris representan ausencia de datos disponibles. "
+            "Pase el cursor sobre cada país para consultar el valor exacto.",
+            style={"color": TEXT_DIM, "fontSize": "0.9em"}),
+
         dcc.Graph(id="plot-mapa-promedio", style={"height": "520px"}),
-        interp_box("Los tonos azul oscuro indican tasas históricamente altas (>90%), frecuentes en "
-                   "Europa, Asia Oriental y América Latina. Los tonos amarillo-claro señalan países con "
-                   "mayor rezago educativo, concentrados en África subsahariana y Asia meridional.")
-    ], style={"background": BG_CARD, "borderRadius": "10px", "padding": "24px", "marginBottom": "20px",
-              "borderLeft": f"6px solid {AZUL_MAIN}"}),
+
+        interp_box(
+            "La escala de color va desde tonos morado oscuro (tasas históricamente más bajas) "
+            "hasta amarillo brillante (tasas históricamente más altas). "
+            "Se observa una marcada heterogeneidad internacional: varios países mantienen "
+            "niveles cercanos al techo educativo (>90%), mientras otros presentan rezagos "
+            "persistentes. El patrón espacial sugiere desigualdades estructurales en el "
+            "acceso y culminación de la educación primaria femenina."
+        )
+
+    ], style={
+        "background": BG_CARD,
+        "borderRadius": "10px",
+        "padding": "24px",
+        "marginBottom": "20px",
+        "borderLeft": f"6px solid {AZUL_MAIN}"
+    }),
+
 
     html.Div([
         html.H5("Mapa 2 — Evolución anual de tasa_fin_cap (2000–2022, animado)",
                 style={"color": CYAN, "fontWeight": "700", "marginBottom": "12px"}),
-        html.P(["Presione el botón ", html.Strong("▶ Play"), " para animar la evolución año a año."],
-               style={"color": TEXT_DIM, "fontSize": "0.9em"}),
+
+        html.P(
+            ["Presione el botón ", html.Strong("▶ Play"),
+             " para visualizar la evolución temporal de las tasas por país."],
+            style={"color": TEXT_DIM, "fontSize": "0.9em"}),
+
         dcc.Graph(id="plot-mapa-animado", style={"height": "540px"}),
-        interp_box("La animación evidencia el avance progresivo de los países hacia tasas más altas "
-                   "entre 2000 y 2022. Las regiones que permanecen en tonos claros son las de mayor "
-                   "fragilidad educativa persistente.")
-    ], style={"background": BG_CARD, "borderRadius": "10px", "padding": "24px", "marginBottom": "20px",
-              "borderLeft": f"6px solid {AZUL_MAIN}"}),
+
+        interp_box(
+            "La animación permite identificar trayectorias de cambio a lo largo del tiempo. "
+            "Un desplazamiento progresivo hacia colores asociados a valores altos evidencia "
+            "mejoras en los niveles de finalización educativa. Los países que mantienen tonos "
+            "oscuros durante gran parte del periodo reflejan persistencia de brechas "
+            "estructurales y procesos de convergencia más lentos."
+        )
+
+    ], style={
+        "background": BG_CARD,
+        "borderRadius": "10px",
+        "padding": "24px",
+        "marginBottom": "20px",
+        "borderLeft": f"6px solid {AZUL_MAIN}"
+    }),
+
 
     html.Div([
         html.H5("Mapa 3 — Cambio absoluto: último año disponible vs. 2000",
                 style={"color": CYAN, "fontWeight": "700", "marginBottom": "12px"}),
-        html.P("Diferencia entre la tasa más reciente y la registrada en el año 2000. "
-               "Solo se muestran países con datos en ambos extremos del periodo.",
-               style={"color": TEXT_DIM, "fontSize": "0.9em"}),
-        dcc.Graph(id="plot-mapa-cambio", style={"height": "520px"}),
-        interp_box("Tonos verde indican mejora; tonos naranja-rojo indican retroceso. Un cambio de "
-                   "+20 pp o más en 22 años representa una transformación educativa sustancial. "
-                   "Los mayores avances se concentran en países que partían de tasas bajas (convergencia beta).")
-    ], style={"background": BG_CARD, "borderRadius": "10px", "padding": "24px", "marginBottom": "20px",
-              "borderLeft": f"6px solid {VERDE_OK}"}),
-])
 
+        html.P(
+            "Diferencia entre la tasa más reciente y la registrada en el año 2000. "
+            "Solo se incluyen países con información disponible en ambos puntos temporales.",
+            style={"color": TEXT_DIM, "fontSize": "0.9em"}),
+
+        dcc.Graph(id="plot-mapa-cambio", style={"height": "520px"}),
+
+        interp_box(
+            "La escala está centrada en cero: los tonos morado representan reducciones "
+            "o retrocesos relativos, mientras los tonos naranja y amarillo representan "
+            "incrementos en la tasa de finalización. Los cambios más intensos indican "
+            "transformaciones educativas significativas. Se aprecia evidencia compatible "
+            "con procesos de convergencia: varios países con niveles históricamente bajos "
+            "presentan mejoras superiores a las economías inicialmente más avanzadas."
+        )
+
+    ], style={
+        "background": BG_CARD,
+        "borderRadius": "10px",
+        "padding": "24px",
+        "marginBottom": "20px",
+        "borderLeft": f"6px solid {VERDE_OK}"
+    }),
+])
 # ─── CONCLUSIONES ─────────────────────────────────────────────────────────────
 tab_conclusiones = html.Div([
     page_header("fas fa-flag-checkered", "Conclusiones del Análisis Exploratorio"),
@@ -1381,6 +1429,99 @@ tab_referencias = html.Div([
     ], style={"background": BG_CARD, "borderRadius": "10px", "padding": "24px"}),
 ])
 
+# ─── VIDEO YOUTUBE ────────────────────────────────────────────────────────────
+YOUTUBE_VIDEO_ID = "IbonuVMPxXo"
+YOUTUBE_WATCH_URL = f"https://www.youtube.com/watch?v={YOUTUBE_VIDEO_ID}"
+YOUTUBE_EMBED_URL = f"https://www.youtube.com/embed/{YOUTUBE_VIDEO_ID}?rel=0&modestbranding=1"
+
+tab_video = html.Div([
+    page_header("fab fa-youtube", "Video — ODS 4: Educación de Calidad"),
+
+    # Tarjeta principal con el reproductor embebido
+    html.Div([
+        html.Div([
+            html.H5(
+                [html.I(className="fas fa-play-circle", style={"marginRight": "8px", "color": "#FF0000"}),
+                 "Reproducir video desde el Dashboard"],
+                style={"color": CYAN, "fontWeight": "700",
+                       "borderBottom": "2px solid rgba(46,134,171,0.3)",
+                       "paddingBottom": "10px", "marginBottom": "20px"}
+            ),
+            html.P(
+                "Visualización del video de YouTube directamente integrada en el dashboard. "
+                "Puede pausar, reanudar y controlar el volumen desde el reproductor.",
+                style={"color": TEXT_DIM, "fontSize": "0.9em", "marginBottom": "18px"}
+            ),
+        ]),
+
+        # Reproductor embebido responsivo
+        html.Div([
+            html.Iframe(
+                src=YOUTUBE_EMBED_URL,
+                style={
+                    "width": "100%",
+                    "height": "560px",
+                    "border": "none",
+                    "borderRadius": "10px",
+                    "boxShadow": f"0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(46,134,171,0.3)",
+                },
+            ),
+        ], style={"marginBottom": "20px"}),
+
+        # Enlace a YouTube
+        html.Div([
+            html.A(
+                [
+                    html.I(className="fab fa-youtube", style={
+                        "marginRight": "10px", "fontSize": "1.3em", "color": "#FF0000"
+                    }),
+                    "Ver en YouTube",
+                    html.I(className="fas fa-external-link-alt", style={
+                        "marginLeft": "10px", "fontSize": "0.85em", "color": TEXT_DIM
+                    }),
+                ],
+                href=YOUTUBE_WATCH_URL,
+                target="_blank",
+                style={
+                    "display": "inline-flex",
+                    "alignItems": "center",
+                    "background": "linear-gradient(135deg, #C0392B 0%, #E74C3C 100%)",
+                    "color": "white",
+                    "padding": "12px 28px",
+                    "borderRadius": "8px",
+                    "fontWeight": "700",
+                    "fontSize": "1em",
+                    "textDecoration": "none",
+                    "boxShadow": "0 4px 14px rgba(192,57,43,0.45)",
+                    "transition": "opacity 0.2s",
+                    "letterSpacing": "0.3px",
+                }
+            ),
+            html.Span(
+                f"  · {YOUTUBE_WATCH_URL}",
+                style={"color": TEXT_DIM, "fontSize": "0.8em", "marginLeft": "14px"}
+            ),
+        ], style={"display": "flex", "alignItems": "center", "flexWrap": "wrap", "gap": "6px"}),
+
+    ], style={
+        "background": BG_CARD,
+        "borderRadius": "12px",
+        "padding": "28px 32px",
+        "marginBottom": "20px",
+        "borderLeft": f"6px solid #E74C3C",
+        "boxShadow": "0 4px 20px rgba(0,0,0,0.35)",
+    }),
+
+    # Caja de contexto / interpretación
+    interp_box([
+        html.Strong("Sobre este video: "),
+        "Este recurso audiovisual complementa el análisis estadístico presentado en el dashboard. "
+        "Aborda el Objetivo de Desarrollo Sostenible 4 (ODS 4) — Educación de Calidad — "
+        "con énfasis en la tasa de finalización de educación primaria femenina a nivel mundial. "
+        "El material es útil para contextualizar los hallazgos cuantitativos del análisis exploratorio.",
+    ]),
+])
+
 # =============================================================================
 # LAYOUT PRINCIPAL
 # =============================================================================
@@ -1413,7 +1554,8 @@ app.layout = html.Div([
      Input("nav-conclusiones", "n_clicks"),
      Input("nav-datos", "n_clicks"),
      Input("nav-referencias", "n_clicks"),
-     Input("nav-prediccion", "n_clicks")],
+     Input("nav-prediccion", "n_clicks"),
+     Input("nav-video", "n_clicks")],
     State("current-tab", "data"),
 )
 def navigate(*args):
@@ -1430,6 +1572,7 @@ def navigate(*args):
         "nav-datos": ("datos", tab_datos),
         "nav-referencias": ("referencias", tab_referencias),
         "nav-prediccion": ("prediccion", tab_prediccion),
+        "nav-video": ("video", tab_video),
     }
     tab_id, content = mapping.get(btn_id, ("intro", tab_intro))
     return content, tab_id
@@ -1811,149 +1954,538 @@ def render_scatter_loess(tab):
     fig.update_layout(height=400)
     return fig
 
-# ─── Mediana anual + IQR ──────────────────────────────────────────────────────
-@app.callback(Output("plot-mediana-anual", "figure"), Input("current-tab", "data"))
+# =============================================================================
+# CALLBACKS — SECCIÓN BIVARIADA (VERSIÓN CORREGIDA Y ROBUSTA)
+# =============================================================================
+
+import numpy as np
+from scipy.stats import linregress
+from dash import callback_context
+from dash.dependencies import Input, Output
+import plotly.graph_objects as go
+import pandas as pd
+
+# =============================================================================
+# STORE PARA CONTROL DE TABS
+# AGREGAR ESTO EN EL LAYOUT PRINCIPAL
+# =============================================================================
+
+dcc.Store(id="current-tab", data="intro")
+
+# =============================================================================
+# CALLBACK PARA ACTUALIZAR TAB ACTIVO
+# =============================================================================
+
+@app.callback(
+    Output("current-tab", "data"),
+    Input("nav-intro", "n_clicks"),
+    Input("nav-univariado", "n_clicks"),
+    Input("nav-bivariado", "n_clicks"),
+    Input("nav-mapa", "n_clicks"),
+    Input("nav-conclusiones", "n_clicks"),
+    Input("nav-datos", "n_clicks"),
+    Input("nav-referencias", "n_clicks"),
+    Input("nav-prediccion", "n_clicks"),
+)
+def update_current_tab(*args):
+
+    ctx = callback_context
+
+    if not ctx.triggered:
+        return "intro"
+
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    mapping = {
+        "nav-intro": "intro",
+        "nav-univariado": "univariado",
+        "nav-bivariado": "bivariado",
+        "nav-mapa": "mapa",
+        "nav-conclusiones": "conclusiones",
+        "nav-datos": "datos",
+        "nav-referencias": "referencias",
+        "nav-prediccion": "prediccion"
+    }
+
+    return mapping.get(button_id, "intro")
+
+
+# =============================================================================
+# FUNCIÓN AUXILIAR PARA ESTADÍSTICAS ANUALES
+# =============================================================================
+
+def yearly_group():
+
+    return (
+        df_2[
+            df_2["anio"].between(2000, 2022)
+        ]
+        .dropna(subset=["tasa_fin_cap"])
+        .groupby("anio")["tasa_fin_cap"]
+    )
+
+
+# =============================================================================
+# MEDIANA ANUAL + IQR
+# =============================================================================
+# ─────────────────────────────────────────────────────────────
+# MEDIANA ANUAL + IQR
+# ─────────────────────────────────────────────────────────────
+
+@app.callback(
+    Output("plot-mediana-anual", "figure"),
+    Input("current-tab", "data")
+)
 def render_mediana_anual(tab):
+
     if tab != "bivariado":
         return go.Figure()
-    agg = (df_2[df_2["anio"].between(2000, 2022)].dropna(subset=["tasa_fin_cap"])
-           .groupby("anio")["tasa_fin_cap"]
-           .agg(mediana="median",
+
+    try:
+
+        agg = (
+            df_2[
+                df_2["anio"].between(2000, 2022)
+            ]
+            .dropna(subset=["tasa_fin_cap"])
+            .groupby("anio")["tasa_fin_cap"]
+            .agg(
+                mediana="median",
                 p25=lambda x: x.quantile(0.25),
-                p75=lambda x: x.quantile(0.75))
-           .reset_index())
+                p75=lambda x: x.quantile(0.75)
+            )
+            .reset_index()
+        )
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=pd.concat([agg["anio"], agg["anio"][::-1]]),
-        y=pd.concat([agg["p75"], agg["p25"][::-1]]),
-        fill="toself", fillcolor="rgba(46,134,171,0.28)", line_color="transparent",
-        name="Banda IQR (P25–P75)",
-        hovertemplate="Año: %{x}<br>IQR: banda<extra></extra>"
-    ))
-    fig.add_trace(go.Scatter(
-        x=agg["anio"], y=agg["mediana"], mode="lines+markers",
-        line=dict(color=AZUL_FUERTE, width=2.5),
-        marker=dict(color="white", line=dict(color=AZUL_FUERTE, width=2), size=8),
-        name="Mediana",
-        hovertemplate="Año: %{x}<br>Mediana: %{y:.1f}%<extra></extra>"
-    ))
-    fig = pl_layout(fig, "Mediana anual de tasa_fin_cap con banda P25–P75",
-                    "Estrechamiento = convergencia entre países", "Año", "tasa_fin_cap (%)")
-    fig.update_xaxes(dtick=2)
-    fig.update_yaxes(range=[58, 104])
-    fig.update_layout(height=380)
-    return fig
+        fig = go.Figure()
 
-# ─── Media vs Mediana ─────────────────────────────────────────────────────────
-@app.callback(Output("plot-media-mediana", "figure"), Input("current-tab", "data"))
+        # Banda IQR
+        fig.add_trace(go.Scatter(
+
+            x=np.concatenate([
+                agg["anio"],
+                agg["anio"][::-1]
+            ]),
+
+            y=np.concatenate([
+                agg["p75"],
+                agg["p25"][::-1]
+            ]),
+
+            fill="toself",
+
+            fillcolor="rgba(46,134,171,0.30)",
+
+            line=dict(color="rgba(0,0,0,0)"),
+
+            name="IQR P25-P75",
+
+            hoverinfo="skip"
+        ))
+
+        # Mediana
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+
+            y=agg["mediana"],
+
+            mode="lines+markers",
+
+            line=dict(
+                color="#2E86AB",
+                width=3
+            ),
+
+            marker=dict(
+                size=7,
+                color="white",
+                line=dict(
+                    color="#2E86AB",
+                    width=2
+                )
+            ),
+
+            name="Mediana"
+        ))
+
+        fig.update_layout(
+
+            title="Mediana anual con banda IQR",
+
+            template="plotly_dark",
+
+            paper_bgcolor="#081C3A",
+
+            plot_bgcolor="#0B2347",
+
+            font=dict(color="white"),
+
+            height=400
+        )
+
+        fig.update_xaxes(dtick=2)
+
+        return fig
+
+    except Exception as e:
+
+        print(e)
+
+        return go.Figure()
+
+# =============================================================================
+# MEDIA VS MEDIANA
+# =============================================================================
+
+@app.callback(
+    Output("plot-media-mediana", "figure"),
+    Input("current-tab", "data")
+)
 def render_media_mediana(tab):
-    if tab != "bivariado":
-        return go.Figure()
-    agg = (df_2[df_2["anio"].between(2000, 2022)].dropna(subset=["tasa_fin_cap"])
-           .groupby("anio")["tasa_fin_cap"]
-           .agg(media="mean", mediana="median")
-           .reset_index())
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=pd.concat([agg["anio"], agg["anio"][::-1]]),
-        y=pd.concat([agg["mediana"], agg["media"][::-1]]),
-        fill="toself", fillcolor="rgba(174,214,241,0.35)", line_color="transparent",
-        name="Brecha media–mediana"
-    ))
-    fig.add_trace(go.Scatter(x=agg["anio"], y=agg["media"], mode="lines+markers",
-                              line=dict(color=AMARILLO, width=2.5, dash="dash"),
-                              marker=dict(color=AMARILLO, size=6), name="Media",
-                              hovertemplate="Año: %{x}<br>Media: %{y:.1f}%<extra></extra>"))
-    fig.add_trace(go.Scatter(x=agg["anio"], y=agg["mediana"], mode="lines+markers",
-                              line=dict(color=AZUL_FUERTE, width=2.5),
-                              marker=dict(color=AZUL_FUERTE, size=6), name="Mediana",
-                              hovertemplate="Año: %{x}<br>Mediana: %{y:.1f}%<extra></extra>"))
-    fig = pl_layout(fig, "Media vs. Mediana anual de tasa_fin_cap",
-                    "Área sombreada = brecha. Cierre = catching-up de países rezagados",
-                    "Año", "tasa_fin_cap (%)")
-    fig.update_xaxes(dtick=2)
-    fig.update_yaxes(range=[70, 102])
-    fig.update_layout(height=380)
-    return fig
+    try:
 
-# ─── Ribbon multicapa ─────────────────────────────────────────────────────────
-@app.callback(Output("plot-mv-ribbon", "figure"), Input("current-tab", "data"))
+        if tab != "bivariado":
+            return go.Figure()
+
+        agg = (
+            yearly_group()
+            .agg(
+                media="mean",
+                mediana="median"
+            )
+            .reset_index()
+        )
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+            y=agg["media"],
+
+            mode="lines",
+
+            line=dict(
+                color="rgba(0,0,0,0)"
+            ),
+
+            showlegend=False,
+            hoverinfo="skip"
+        ))
+
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+            y=agg["mediana"],
+
+            mode="lines",
+
+            fill="tonexty",
+
+            fillcolor="rgba(174,214,241,0.35)",
+
+            line=dict(
+                color="rgba(0,0,0,0)"
+            ),
+
+            name="Brecha media–mediana",
+
+            hovertemplate=(
+                "Año: %{x}"
+                "<extra></extra>"
+            )
+        ))
+
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+            y=agg["media"],
+
+            mode="lines+markers",
+
+            line=dict(
+                color=AMARILLO,
+                width=2.5,
+                dash="dash"
+            ),
+
+            marker=dict(
+                color=AMARILLO,
+                size=6
+            ),
+
+            name="Media",
+
+            hovertemplate=(
+                "Año: %{x}"
+                "<br>Media: %{y:.1f}%"
+                "<extra></extra>"
+            )
+        ))
+
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+            y=agg["mediana"],
+
+            mode="lines+markers",
+
+            line=dict(
+                color=AZUL_FUERTE,
+                width=2.5
+            ),
+
+            marker=dict(
+                color=AZUL_FUERTE,
+                size=6
+            ),
+
+            name="Mediana",
+
+            hovertemplate=(
+                "Año: %{x}"
+                "<br>Mediana: %{y:.1f}%"
+                "<extra></extra>"
+            )
+        ))
+
+        fig = pl_layout(
+            fig,
+            "Media vs. Mediana anual de tasa_fin_cap",
+            "Brecha entre tendencia central robusta y promedio",
+            "Año",
+            "tasa_fin_cap (%)"
+        )
+
+        fig.update_xaxes(dtick=2)
+
+        fig.update_yaxes(range=[70, 102])
+
+        fig.update_layout(height=380)
+
+        return fig
+
+    except Exception as e:
+
+        print(f"[ERROR render_media_mediana] {e}")
+
+        return _empty_fig(str(e))
+
+
+# =============================================================================
+# RIBBON MULTICAPA
+# =============================================================================
+# ─────────────────────────────────────────────────────────────
+# RIBBON MULTICAPA
+# ─────────────────────────────────────────────────────────────
+
+@app.callback(
+    Output("plot-mv-ribbon", "figure"),
+    Input("current-tab", "data")
+)
 def render_ribbon(tab):
+
     if tab != "bivariado":
         return go.Figure()
-    agg = (df_2[df_2["anio"].between(2000, 2022)].dropna(subset=["tasa_fin_cap"])
-           .groupby("anio")["tasa_fin_cap"]
-           .agg(med="median",
+
+    try:
+
+        agg = (
+            df_2[
+                df_2["anio"].between(2000, 2022)
+            ]
+            .dropna(subset=["tasa_fin_cap"])
+            .groupby("anio")["tasa_fin_cap"]
+            .agg(
+                med="median",
                 p10=lambda x: x.quantile(0.10),
                 p25=lambda x: x.quantile(0.25),
                 p75=lambda x: x.quantile(0.75),
-                p90=lambda x: x.quantile(0.90))
-           .reset_index())
+                p90=lambda x: x.quantile(0.90)
+            )
+            .reset_index()
+        )
 
-    fig = go.Figure()
-    # Banda P10–P90
-    fig.add_trace(go.Scatter(
-        x=pd.concat([agg["anio"], agg["anio"][::-1]]),
-        y=pd.concat([agg["p90"], agg["p10"][::-1]]),
-        fill="toself", fillcolor="rgba(174,214,241,0.30)", line_color="transparent",
-        name="Banda P10–P90 (80% de países)",
-        hovertemplate="Banda P10–P90<extra></extra>"
-    ))
-    # Banda P25–P75
-    fig.add_trace(go.Scatter(
-        x=pd.concat([agg["anio"], agg["anio"][::-1]]),
-        y=pd.concat([agg["p75"], agg["p25"][::-1]]),
-        fill="toself", fillcolor="rgba(46,134,171,0.40)", line_color="transparent",
-        name="IQR P25–P75 (50% central)",
-        hovertemplate="IQR P25–P75<extra></extra>"
-    ))
-    # Mediana
-    fig.add_trace(go.Scatter(
-        x=agg["anio"], y=agg["med"], mode="lines+markers",
-        line=dict(color=AZUL_FUERTE, width=2.5),
-        marker=dict(color="white", line=dict(color=AZUL_FUERTE, width=2), size=8),
-        name="Mediana",
-        hovertemplate="Año: %{x}<br>Mediana: %{y:.1f}%<extra></extra>"
-    ))
-    fig = pl_layout(fig, "Evolución del panel — Mediana, IQR y banda P10–P90 de tasa_fin_cap",
-                    "Azul oscuro: IQR (P25–P75) | Azul claro: P10–P90 | Línea: mediana",
-                    "Año", "tasa_fin_cap (%)")
-    fig.update_xaxes(dtick=2)
-    fig.update_yaxes(range=[35, 105])
-    fig.update_layout(height=420)
-    return fig
+        fig = go.Figure()
 
-# ─── Mapa de calor ────────────────────────────────────────────────────────────
-@app.callback(Output("plot-heatmap", "figure"), Input("slider-n-heat", "value"), Input("current-tab", "data"))
-def render_heatmap(n_heat, tab):
-    if tab != "bivariado":
+        # Banda P10-P90
+        fig.add_trace(go.Scatter(
+
+            x=np.concatenate([
+                agg["anio"],
+                agg["anio"][::-1]
+            ]),
+
+            y=np.concatenate([
+                agg["p90"],
+                agg["p10"][::-1]
+            ]),
+
+            fill="toself",
+
+            fillcolor="rgba(173,216,230,0.25)",
+
+            line=dict(color="rgba(0,0,0,0)"),
+
+            name="P10-P90"
+        ))
+
+        # Banda IQR
+        fig.add_trace(go.Scatter(
+
+            x=np.concatenate([
+                agg["anio"],
+                agg["anio"][::-1]
+            ]),
+
+            y=np.concatenate([
+                agg["p75"],
+                agg["p25"][::-1]
+            ]),
+
+            fill="toself",
+
+            fillcolor="rgba(46,134,171,0.45)",
+
+            line=dict(color="rgba(0,0,0,0)"),
+
+            name="IQR"
+        ))
+
+        # Mediana
+        fig.add_trace(go.Scatter(
+
+            x=agg["anio"],
+
+            y=agg["med"],
+
+            mode="lines+markers",
+
+            line=dict(
+                color="white",
+                width=3
+            ),
+
+            marker=dict(
+                size=7
+            ),
+
+            name="Mediana"
+        ))
+
+        fig.update_layout(
+
+            title="Evolución del Panel — Mediana con Bandas",
+
+            template="plotly_dark",
+
+            paper_bgcolor="#081C3A",
+
+            plot_bgcolor="#0B2347",
+
+            font=dict(color="white"),
+
+            height=500
+        )
+
+        fig.update_xaxes(dtick=2)
+
+        return fig
+
+    except Exception as e:
+
+        print(e)
+
         return go.Figure()
-    if df_2.empty or df_2["pais"].nunique() < 2:
-        return _empty_fig("Datos insuficientes para mapa de calor.")
-    top_p = (df_2.groupby("pais")["tasa_fin_cap"].mean()
-             .sort_values(ascending=False).head(n_heat).index.tolist())
-    d_h = df_2[df_2["pais"].isin(top_p)][["pais", "anio", "tasa_fin_cap"]]
-    mat = d_h.pivot(index="pais", columns="anio", values="tasa_fin_cap")
-    mat = mat.loc[top_p]
+# =============================================================================
+# HEATMAP
+# =============================================================================
 
-    fig = go.Figure(go.Heatmap(
-        z=mat.values,
-        x=[str(c) for c in mat.columns],
-        y=mat.index.tolist(),
-        colorscale=[[0, "#FEF9E7"], [0.25, "#AED6F1"], [0.6, AZUL_MAIN], [1, AZUL_FUERTE]],
-        zmin=0, zmax=100,
-        colorbar=dict(title="tasa_fin_cap (%)", ticksuffix="%", thickness=16, len=0.7,
-                      bgcolor=BG_PLOT, bordercolor="rgba(46,134,171,0.4)",
-                      tickfont=dict(color=TEXT_MAIN), titlefont=dict(color=CYAN)),
-        hovertemplate="País: %{y}<br>Año: %{x}<br>tasa_fin_cap: %{z:.1f}%<extra></extra>"
-    ))
-    fig = pl_layout(fig, f"Mapa de Calor — tasa_fin_cap por País y Año (Top {n_heat})", "",
-                    "Año", "País")
-    fig.update_layout(height=max(400, n_heat * 18 + 100))
-    return fig
+@app.callback(
+    Output("plot-heatmap", "figure"),
+    Input("slider-n-heat", "value"),
+    Input("current-tab", "data")
+)
+def render_heatmap(n_heat, tab):
 
+    try:
+
+        if tab != "bivariado":
+            return go.Figure()
+
+        if df_2.empty or df_2["pais"].nunique() < 2:
+            return _empty_fig("Datos insuficientes para mapa de calor.")
+
+        top_p = (
+            df_2.groupby("pais")["tasa_fin_cap"]
+            .mean()
+            .sort_values(ascending=False)
+            .head(n_heat)
+            .index
+            .tolist()
+        )
+
+        d_h = df_2[
+            df_2["pais"].isin(top_p)
+        ][["pais", "anio", "tasa_fin_cap"]]
+
+        # CORREGIDO
+        mat = d_h.pivot_table(
+            index="pais",
+            columns="anio",
+            values="tasa_fin_cap",
+            aggfunc="mean"
+        )
+
+        mat = mat.loc[top_p]
+
+        fig = go.Figure(go.Heatmap(
+
+            z=mat.values,
+
+            x=[str(c) for c in mat.columns],
+
+            y=mat.index.tolist(),
+
+            colorscale=[
+                [0, "#FEF9E7"],
+                [0.25, "#AED6F1"],
+                [0.6, AZUL_MAIN],
+                [1, AZUL_FUERTE]
+            ],
+
+            zmin=0,
+            zmax=100,
+
+            hovertemplate=(
+                "País: %{y}"
+                "<br>Año: %{x}"
+                "<br>tasa_fin_cap: %{z:.1f}%"
+                "<extra></extra>"
+            )
+        ))
+
+        fig = pl_layout(
+            fig,
+            f"Mapa de Calor — Top {n_heat}",
+            "",
+            "Año",
+            "País"
+        )
+
+        fig.update_layout(
+            height=max(400, n_heat * 18 + 100)
+        )
+
+        return fig
+
+    except Exception as e:
+
+        print(f"[ERROR render_heatmap] {e}")
+
+        return _empty_fig(str(e))
 # ─── Pendientes pre-techo ──────────────────────────────────────────────────────
 @app.callback(Output("plot-slopes-top", "figure"), Input("slider-n-slopes", "value"), Input("current-tab", "data"))
 def render_slopes(n_top, tab):
@@ -2129,108 +2661,300 @@ def render_hipotesis(n_clicks, p1, p2):
 
     return fig_box, fig_dist, resultado_ui
 
-# ─── Mapas ─────────────────────────────────────────────────────────────────────
-@app.callback(
-    Output("plot-mapa-promedio", "figure"),
-    Output("plot-mapa-animado", "figure"),
-    Output("plot-mapa-cambio", "figure"),
-    Input("current-tab", "data")
+# ─── Mapas ───────────────────────────────────────────────────────────────────
+import plotly.express as px
+from dash import Input, Output
+
+# ─────────────────────────────────────
+# LIMPIEZA DEL DATAFRAME
+# ─────────────────────────────────────
+
+df_2["iso3"] = (
+    df_2["iso3"]
+    .astype(str)
+    .str.strip()
+    .str.upper()
 )
-def render_mapas(tab):
-    if tab != "mapa":
-        return go.Figure(), go.Figure(), go.Figure()
-    d = df_2[df_2["anio"].between(2000, 2022)].dropna(subset=["tasa_fin_cap"])
-    if "iso3" not in d.columns or len(d) < 10:
-        msg = "Datos ISO-3 insuficientes para renderizar los mapas."
-        return _empty_fig(msg), _empty_fig(msg), _empty_fig(msg)
 
-    # Mapa 1: Promedio histórico
-    d_prom = (d.groupby(["iso3", "pais"])["tasa_fin_cap"]
-              .agg(media_hist="mean", n_anios="nunique")
-              .reset_index()
-              .assign(media_hist=lambda x: x["media_hist"].round(1),
-                      hover_txt=lambda x: x.apply(
-                          lambda r: f"<b>{r['pais']}</b> ({r['iso3']})<br>Promedio: {r['media_hist']:.1f}%<br>Años: {r['n_anios']}", axis=1)))
+df_2 = df_2[df_2["iso3"].str.len() == 3]
 
-    fig1 = go.Figure(go.Choropleth(
-        locations=d_prom["iso3"], locationmode="ISO-3",
-        z=d_prom["media_hist"], text=d_prom["hover_txt"], hoverinfo="text",
-        colorscale=MAPA_COLORSCALE, zmin=0, zmax=100,
-        colorbar=dict(title="tasa_fin_cap (%)", ticksuffix="%", thickness=16, len=0.7,
-                      bgcolor=BG_PLOT, bordercolor="rgba(46,134,171,0.4)",
-                      tickfont=dict(color=TEXT_MAIN), titlefont=dict(color=CYAN)),
-        marker_line=dict(color="#FFFFFF", width=0.4)
-    ))
-    fig1.update_layout(
-        title=dict(text="<b>Promedio histórico de tasa_fin_cap por país (2000–2022)</b>",
-                   font=dict(size=14, color=CYAN), x=0.02),
-        geo=dict(showframe=False, showcoastlines=True, coastlinecolor="rgba(46,134,171,0.4)",
-                 showland=True, landcolor=BG_PLOT, showocean=True, oceancolor="#0A1628",
-                 showlakes=False, projection_type="natural earth"),
-        paper_bgcolor="#112240", font=dict(color=TEXT_MAIN),
-        margin=dict(t=60, r=10, b=10, l=10), height=520
+df_2 = df_2.dropna(
+    subset=[
+        "iso3",
+        "anio",
+        "tasa_fin_cap"
+    ]
+)
+
+# ─────────────────────────────────────
+# MAPA 1
+# ─────────────────────────────────────
+
+@app.callback(
+    Output("plot-mapa-promedio","figure"),
+    Input("plot-mapa-promedio","id")
+)
+def update_mapa_promedio(_):
+
+    d = (
+        df_2.groupby(
+            ["iso3","pais"],
+            as_index=False
+        )["tasa_fin_cap"]
+        .mean()
+        .rename(
+            columns={
+                "tasa_fin_cap":"tasa_media"
+            }
+        )
     )
 
-    # Mapa 2: Animado por año
-    d_anim = d.sort_values("anio").assign(
-        anio_chr=lambda x: x["anio"].astype(str),
-    )
-    fig2 = px.choropleth(
-        d_anim, locations="iso3", locationmode="ISO-3",
-        color="tasa_fin_cap", animation_frame="anio_chr",
-        color_continuous_scale=MAPA_COLORSCALE, range_color=[0, 100],
-        hover_name="pais", hover_data={"tasa_fin_cap": ":.1f", "anio_chr": False, "iso3": False}
-    )
-    fig2.update_layout(
-        title=dict(text="<b>Evolución anual de tasa_fin_cap por país</b><br><sup>Presione ▶ Play para animar</sup>",
-                   font=dict(size=14, color=CYAN), x=0.02),
-        geo=dict(showframe=False, showcoastlines=True, coastlinecolor="rgba(46,134,171,0.4)",
-                 showland=True, landcolor=BG_PLOT, showocean=True, oceancolor="#0A1628",
-                 showlakes=False, projection_type="natural earth"),
-        paper_bgcolor="#112240", font=dict(color=TEXT_MAIN),
-        margin=dict(t=70, r=10, b=10, l=10), height=540,
-        coloraxis_colorbar=dict(title="tasa_fin_cap (%)", ticksuffix="%", thickness=16, len=0.7,
-                                bgcolor=BG_PLOT, tickfont=dict(color=TEXT_MAIN), titlefont=dict(color=CYAN))
+    fig = px.choropleth(
+        d,
+        locations="iso3",
+        locationmode="ISO-3",
+        color="tasa_media",
+        hover_name="pais",
+        hover_data={
+            "tasa_media":":.2f",
+            "iso3":False
+        },
+        range_color=[0,100]
     )
 
-    # Mapa 3: Cambio absoluto
-    d_ini = (d.groupby(["iso3", "pais"]).apply(lambda g: g.loc[g["anio"].idxmin()])
-             .reset_index(drop=True)[["iso3", "pais", "anio", "tasa_fin_cap"]]
-             .rename(columns={"anio": "anio_ini", "tasa_fin_cap": "tasa_ini"}))
-    d_fin2 = (d.groupby(["iso3", "pais"]).apply(lambda g: g.loc[g["anio"].idxmax()])
-              .reset_index(drop=True)[["iso3", "pais", "anio", "tasa_fin_cap"]]
-              .rename(columns={"anio": "anio_fin", "tasa_fin_cap": "tasa_fin2"}))
-    d_cambio = (d_ini.merge(d_fin2, on=["iso3", "pais"])
-                .assign(cambio=lambda x: (x["tasa_fin2"] - x["tasa_ini"]).round(1),
-                        hover_txt=lambda x: x.apply(
-                            lambda r: f"<b>{r['pais']}</b> ({r['iso3']})<br>"
-                                      f"Año inicial: {r['anio_ini']} → {r['tasa_ini']:.1f}%<br>"
-                                      f"Año final: {r['anio_fin']} → {r['tasa_fin2']:.1f}%<br>"
-                                      f"<b>Cambio: {r['cambio']:+.1f} pp</b>", axis=1)))
-    lim = d_cambio["cambio"].abs().max()
-
-    fig3 = go.Figure(go.Choropleth(
-        locations=d_cambio["iso3"], locationmode="ISO-3",
-        z=d_cambio["cambio"], text=d_cambio["hover_txt"], hoverinfo="text",
-        colorscale=CAMBIO_COLORSCALE, zmin=-lim, zmax=lim,
-        colorbar=dict(title="Cambio (pp)", ticksuffix=" pp", thickness=16, len=0.7,
-                      bgcolor=BG_PLOT, bordercolor="rgba(46,134,171,0.4)",
-                      tickfont=dict(color=TEXT_MAIN), titlefont=dict(color=CYAN)),
-        marker_line=dict(color="#FFFFFF", width=0.4)
-    ))
-    fig3.update_layout(
-        title=dict(text=("<b>Cambio absoluto en tasa_fin_cap: último año vs. 2000</b><br>"
-                         "<sup>Verde = mejora | Rojo = retroceso</sup>"),
-                   font=dict(size=14, color=CYAN), x=0.02),
-        geo=dict(showframe=False, showcoastlines=True, coastlinecolor="rgba(46,134,171,0.4)",
-                 showland=True, landcolor=BG_PLOT, showocean=True, oceancolor="#0A1628",
-                 showlakes=False, projection_type="natural earth"),
-        paper_bgcolor="#112240", font=dict(color=TEXT_MAIN),
-        margin=dict(t=80, r=10, b=10, l=10), height=520
+    fig.update_geos(
+        showcoastlines=True,
+        showocean=True,
+        showland=True,
+        projection_type="natural earth"
     )
 
-    return fig1, fig2, fig3
+    return fig
 
+
+# ─────────────────────────────────────
+# MAPA 2
+# ─────────────────────────────────────────────────────────────
+# MAPA MUNDIAL ANIMADO — ORDEN CRONOLÓGICO CORRECTO
+# ─────────────────────────────────────────────────────────────
+
+@app.callback(
+    Output("plot-mapa-animado", "figure"),
+    Input("plot-mapa-animado", "id")
+)
+def update_mapa_animado(_):
+
+    try:
+
+        # =====================================================
+        # COPIA Y LIMPIEZA DEL DATAFRAME
+        # =====================================================
+
+        d = df_2.copy()
+
+        d = d.dropna(
+            subset=[
+                "anio",
+                "iso3",
+                "tasa_fin_cap"
+            ]
+        )
+
+        # =====================================================
+        # ASEGURAR FORMATO NUMÉRICO
+        # =====================================================
+
+        d["anio"] = d["anio"].astype(int)
+
+        # =====================================================
+        # ORDENAR CRONOLÓGICAMENTE
+        # =====================================================
+
+        d = d.sort_values("anio")
+
+        # =====================================================
+        # CREAR STRING PARA LA ANIMACIÓN
+        # =====================================================
+
+        d["anio_str"] = d["anio"].astype(str)
+
+        # =====================================================
+        # CREAR MAPA
+        # =====================================================
+
+        fig = px.choropleth(
+
+            d,
+
+            locations="iso3",
+
+            locationmode="ISO-3",
+
+            color="tasa_fin_cap",
+
+            animation_frame="anio_str",
+
+            animation_group="iso3",
+
+            hover_name="pais",
+
+            hover_data={
+                "anio": True,
+                "tasa_fin_cap": ':.1f'
+            },
+
+            range_color=[0, 100],
+
+            color_continuous_scale=[
+                [0.0, "#FEF9E7"],
+                [0.25, "#AED6F1"],
+                [0.6, "#3498DB"],
+                [1.0, "#1B4F72"]
+            ]
+        )
+
+        # =====================================================
+        # ORDENAR SLIDER
+        # =====================================================
+
+        if fig.layout.sliders:
+
+            fig.layout.sliders[0]["steps"] = sorted(
+
+                fig.layout.sliders[0]["steps"],
+
+                key=lambda step: int(step["label"])
+            )
+
+        # =====================================================
+        # ORDENAR FRAMES INTERNOS
+        # =====================================================
+
+        fig.frames = sorted(
+
+            fig.frames,
+
+            key=lambda frame: int(frame.name)
+        )
+
+        # =====================================================
+        # VELOCIDAD DE ANIMACIÓN
+        # =====================================================
+
+        if fig.layout.updatemenus:
+
+            fig.layout.updatemenus[0]\
+                .buttons[0]\
+                .args[1]["frame"]["duration"] = 700
+
+            fig.layout.updatemenus[0]\
+                .buttons[0]\
+                .args[1]["transition"]["duration"] = 300
+
+        # =====================================================
+        # ESTILO DEL MAPA
+        # =====================================================
+
+        fig.update_layout(
+
+            title={
+
+                "text": "Mapa Mundial Animado — Evolución de tasa_fin_cap",
+
+                "x": 0.5,
+
+                "font": {
+                    "size": 24,
+                    "color": "#58D3F7"
+                }
+            },
+
+            paper_bgcolor="#081C3A",
+
+            plot_bgcolor="#0B2347",
+
+            font=dict(
+                color="white"
+            ),
+
+            geo=dict(
+
+                bgcolor="#081C3A",
+
+                showframe=False,
+
+                showcoastlines=True,
+
+                coastlinecolor="rgba(255,255,255,0.25)",
+
+                projection_type="natural earth"
+            ),
+
+            margin=dict(
+                l=10,
+                r=10,
+                t=70,
+                b=10
+            ),
+
+            height=700
+        )
+
+        return fig
+
+    except Exception as e:
+
+        print(f"[ERROR MAPA ANIMADO] {e}")
+
+        return go.Figure()
+# ─────────────────────────────────────
+# MAPA 3
+# ─────────────────────────────────────
+
+@app.callback(
+    Output("plot-mapa-cambio","figure"),
+    Input("plot-mapa-cambio","id")
+)
+def update_mapa_cambio(_):
+
+    inicio = df_2[
+        df_2["anio"]==2000
+    ]
+
+    ultimo = df_2.loc[
+        df_2.groupby(
+            "iso3"
+        )["anio"]
+        .idxmax()
+    ]
+
+    cambio = inicio.merge(
+        ultimo,
+        on="iso3"
+    )
+
+    cambio["delta"] = (
+        cambio["tasa_fin_cap_y"]
+        -
+        cambio["tasa_fin_cap_x"]
+    )
+
+    lim=max(
+        cambio["delta"].abs().max(),
+        1
+    )
+
+    fig=px.choropleth(
+        cambio,
+        locations="iso3",
+        locationmode="ISO-3",
+        color="delta",
+        color_continuous_midpoint=0,
+        range_color=[-lim,lim],
+        hover_name="pais_x"
+    )
+
+    return fig
 # ─── Tabla de datos ────────────────────────────────────────────────────────────
 @app.callback(
     Output("tabla-datos", "children"),
