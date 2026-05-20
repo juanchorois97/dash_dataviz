@@ -3170,17 +3170,35 @@ def _compute_arima_all(df_2, horizonte=5):
     # ── 4. Ajuste del mejor modelo (AIC) ──────────────────────────────────────
     order_best = (int(best_aic["p"]), int(best_aic["d"]), int(best_aic["q"]))
     model_fit  = ARIMA(serie, order=order_best).fit()
-    fitted     = model_fit.fittedvalues
-    resid      = model_fit.resid
+
+    # fittedvalues/resid de statsmodels tienen indice posicional (0,1,2...)
+    # Con d>0 pueden tener menos puntos que 'serie' (los primeros d son NaN).
+    # Convertimos a numpy y rellenamos para igualar longitud con 'anios'.
+    fitted_raw = np.array(model_fit.fittedvalues, dtype=float)
+    resid_raw  = np.array(model_fit.resid,        dtype=float)
+
+    if len(fitted_raw) < n:
+        pad = n - len(fitted_raw)
+        fitted_raw = np.concatenate([np.full(pad, np.nan), fitted_raw])
+        resid_raw  = np.concatenate([np.full(pad, np.nan), resid_raw])
+
+    # Rellenar NaN iniciales: fitted con primer valor valido, resid con 0
+    first_valid = next((v for v in fitted_raw if not np.isnan(v)), serie[0])
+    fitted_raw  = np.where(np.isnan(fitted_raw), first_valid, fitted_raw)
+    resid_raw   = np.where(np.isnan(resid_raw),  0.0,         resid_raw)
+
+    fitted = fitted_raw
+    resid  = resid_raw
 
     # ── 5. Diagnóstico residuales ──────────────────────────────────────────────
-    sw_stat, sw_p = shapiro(resid)
-    lb_result     = acorr_ljungbox(resid, lags=[10], return_df=True)
+    resid_valid = resid[resid != 0.0] if np.any(resid != 0.0) else resid
+    sw_stat, sw_p = shapiro(resid_valid)
+    lb_result     = acorr_ljungbox(resid_valid, lags=[10], return_df=True)
     lb_stat       = lb_result["lb_stat"].values[0]
     lb_p          = lb_result["lb_pvalue"].values[0]
 
     # QQ-plot teórico
-    qq = probplot(resid, dist="norm")
+    qq = probplot(resid_valid, dist="norm")
     qq_x = qq[0][0]  # quantiles teóricos
     qq_y = qq[0][1]  # quantiles observados
     qq_line_x = np.array([qq_x.min(), qq_x.max()])
@@ -3194,8 +3212,8 @@ def _compute_arima_all(df_2, horizonte=5):
 
     model_train = ARIMA(train_ser, order=order_best).fit()
     fc_val      = model_train.get_forecast(steps=len(test_ser))
-    val_pred    = fc_val.predicted_mean
-    val_ci      = fc_val.conf_int(alpha=0.05)
+    val_pred    = np.array(fc_val.predicted_mean, dtype=float)
+    val_ci      = np.array(fc_val.conf_int(alpha=0.05), dtype=float)
 
     mae   = float(np.mean(np.abs(test_ser - val_pred)))
     rmse  = float(np.sqrt(np.mean((test_ser - val_pred) ** 2)))
@@ -3212,8 +3230,8 @@ def _compute_arima_all(df_2, horizonte=5):
 
     # ── 7. Pronóstico ─────────────────────────────────────────────────────────
     fc_full   = model_fit.get_forecast(steps=horizonte)
-    fc_mean   = fc_full.predicted_mean
-    fc_ci     = fc_full.conf_int(alpha=0.05)
+    fc_mean   = np.array(fc_full.predicted_mean, dtype=float)
+    fc_ci     = np.array(fc_full.conf_int(alpha=0.05), dtype=float)
     fc_anios  = list(range(anios[-1] + 1, anios[-1] + 1 + horizonte))
 
     df_fc = pd.DataFrame({
@@ -3892,6 +3910,8 @@ def register_prediccion_callbacks(app, df_2):
 
         # ── Paso 5: Residuales ────────────────────────────────────────────────
         resid = R["resid"]
+        # Filtrar ceros de padding para histograma y QQ (solo residuales reales)
+        resid_nz = resid[resid != 0.0] if np.any(resid != 0.0) else resid
 
         fig_resid_ts = go.Figure()
         fig_resid_ts.add_trace(go.Scatter(
@@ -3907,15 +3927,15 @@ def register_prediccion_callbacks(app, df_2):
 
         fig_resid_hist = go.Figure()
         fig_resid_hist.add_trace(go.Histogram(
-            x=resid, nbinsx=10, name="Frecuencia",
+            x=resid_nz, nbinsx=10, name="Frecuencia",
             marker=dict(color=AZUL_MAIN, opacity=0.8,
                         line=dict(color="rgba(100,207,246,0.4)", width=1)),
         ))
         # Curva normal superpuesta
-        x_norm = np.linspace(resid.min(), resid.max(), 100)
-        y_norm = (np.exp(-0.5 * ((x_norm - resid.mean()) / resid.std())**2)
-                  / (resid.std() * np.sqrt(2 * np.pi)))
-        y_norm_scaled = y_norm * len(resid) * (resid.max() - resid.min()) / 10
+        x_norm = np.linspace(resid_nz.min(), resid_nz.max(), 100)
+        y_norm = (np.exp(-0.5 * ((x_norm - resid_nz.mean()) / resid_nz.std())**2)
+                  / (resid_nz.std() * np.sqrt(2 * np.pi)))
+        y_norm_scaled = y_norm * len(resid_nz) * (resid_nz.max() - resid_nz.min()) / 10
         fig_resid_hist.add_trace(go.Scatter(
             x=x_norm, y=y_norm_scaled, mode="lines", name="Normal teórica",
             line=dict(color=CYAN, width=2, dash="dot"),
