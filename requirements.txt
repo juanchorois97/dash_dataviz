@@ -13,3 +13,6 @@ statsmodels>=0.14.0
 wbgapi>=1.0.12          # API del Banco Mundial (alternativa: requests)
 requests>=2.31.0        # Fallback si wbgapi no está disponible
 gunicorn
+pmdarima
+scikit-learn
+scipy
