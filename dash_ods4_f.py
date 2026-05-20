@@ -278,20 +278,6 @@ def prepare_data():
     df_2["tasa_fin_cap"] = df_2["tasa_fin"].clip(0, 100)
     df_2 = df_2.sort_values(["pais", "anio"]).reset_index(drop=True)
 
-    # ── Interpolación defensiva: garantiza series anuales completas para ARIMA ──
-    # Rellenar huecos dentro de cada país con interpolación lineal
-    df_2 = (df_2.set_index(["iso3", "pais", "anio"])
-              .unstack("anio")
-              .interpolate(method="linear", axis=1, limit_direction="both")
-              .stack("anio")
-              .reset_index())
-    # Si aún quedan NaN (países con un solo año) → forward/back fill por país
-    df_2["tasa_fin"] = (df_2.groupby("iso3")["tasa_fin"]
-                           .transform(lambda s: s.ffill().bfill()))
-    df_2["tasa_fin_cap"] = (df_2.groupby("iso3")["tasa_fin_cap"]
-                               .transform(lambda s: s.ffill().bfill()))
-    df_2 = df_2.dropna(subset=["tasa_fin"]).reset_index(drop=True)
-
     print(f"  df_2 final: {len(df_2)} filas, {df_2['iso3'].nunique()} países individuales")
     return df_raw.drop(columns=["_is_country"], errors="ignore"), df_1, df_2
 
